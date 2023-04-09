@@ -2,9 +2,9 @@
 
 namespace App\Crud;
 
+use App\Exception\InternalServerError;
 use Exception;
 use PDO;
-use PDOException;
 
 class ProductsCrud
 {
@@ -12,7 +12,7 @@ class ProductsCrud
     {
     }
 
-    public function getProductsList(): ?array
+    public function getList(): ?array
     {
         $stmt = $this->pdo->query("SELECT * FROM products");
         $products = $stmt->fetchAll();
@@ -38,11 +38,11 @@ class ProductsCrud
             'desc_product' => $data['description']
         ]);
         if ($stmt->rowCount() === 0) {
-            throw new Exception('Aucune ligne n\'a pu être enregistrée');
+            throw new InternalServerError("No line could be registered");
         }
     }
 
-    public function getProduct(int $id): ?array
+    public function get(int $id): ?array
     {
         $query = "SELECT * FROM products WHERE id = :id";
         $stmt = $this->pdo->prepare($query);
@@ -52,31 +52,45 @@ class ProductsCrud
         return ($product === false) ? null : $product;
     }
 
-    public function putProduct(int $id, array $data): void
+    /**
+     * modifies an existing product 
+     *
+     * @param integer $id
+     * @param array $data name, baseprice & description
+     * @return void
+     * @throws Exception
+     */
+    public function put(int $id, array $data): void
     {
         $query = "UPDATE products SET name = :name_product, priceHT = :price_ht, description = :desc_product WHERE id = :id;";
 
-        try {
-            $stmt = $this->pdo->prepare($query);
-            $stmt->execute([
-                'name_product' => $data['name'],
-                'price_ht' => $data['baseprice'],
-                'desc_product' => $data['description'],
-                'id' => $id
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([
+            'name_product' => $data['name'],
+            'price_ht' => $data['baseprice'],
+            'desc_product' => $data['description'],
+            'id' => $id
         ]);
-        } catch (PDOException $e) {
-            
+        if ($stmt->rowCount() === 0) {
+            throw new InternalServerError('No line could be modified');
         }
     }
 
-    public function deleteProduct(int $id): void
+    /**
+     * deletes an existing product
+     *
+     * @param integer $id
+     * @return void
+     * @throws Exception
+     */
+    public function delete(int $id): void
     {
         $query = "DELETE FROM products WHERE id = :id;";
 
         $stmt = $this->pdo->prepare($query);
         $stmt->execute(['id' => $id]);
         if ($stmt->rowCount() === 0) {
-            throw new Exception('Aucune ligne n\'a pu être supprimée');
+            throw new InternalServerError('No line could be deleted');
         }
     }
 }

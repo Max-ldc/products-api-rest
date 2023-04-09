@@ -4,7 +4,6 @@ namespace App\Config;
 
 use App\Http\ResponseCode;
 use Throwable;
-use App\Exception\APIException;
 
 class ExceptionHandlerInitializer
 {

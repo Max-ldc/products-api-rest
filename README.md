@@ -11,3 +11,11 @@ Après discussion avec toi avant la fin du cours Vendredi, je sais qu'il faudrai
 Autre point d'amélioration : Que le controlleur retourne quelque chose à l'index, et qu'on se charge d'afficher/retourner le response code dans index.
 
 A faire également : gérer une 2è ressource. *Facultatif : Essayer de faire une ressource liée aux produits (catégories ?)*
+
+## Deuxième commit : Gestion d'erreurs
+
+**Création de classes adaptées pour chaque Erreur**. Dans le construct de chaque, je définis son code avec la constante ResponseCode correspondante. Je récupère aussi le message (j'ai l'impression qu'en définissant un construct, le construct de base de Exception n'est plus hérité du tout : je dois donc remettre que je récupère le message)
+**Création de la classe ExceptionsHandler** et de sa méthode statique sendError pour retourner en JSON l'erreur, son code et son message.
+
+**Dans ProductsCrud** : Lancement d'erreur. J'ai hésité mais j'ai choisi de lancer des erreurs InternalServerError car en cas d'erreur du client, l'erreur serait repérée plus haut. En cas d'erreur dans le crud, il s'agirait plutôt d'un problème de BDD ou de code
+

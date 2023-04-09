@@ -2,10 +2,14 @@
 
 namespace App\Controller;
 
+use App\Config\ExceptionHandlerInitializer;
 use App\Crud\ProductsCrud;
-use App\Exception\APIException;
+use App\Exception\ExceptionsHandler;
+use App\Exception\MethodNotAllowed;
+use App\Exception\NotFound;
 use App\Exception\UnprocessableContentException;
 use App\Http\ResponseCode;
+use Exception;
 use PDO;
 
 class ProductsApiCrudController
@@ -40,14 +44,14 @@ class ProductsApiCrudController
     private function checkHttpMethod(): void
     {
         if (!in_array($this->httpMethod, self::ACCEPTED_METHODS)) {
-            throw new APIException("Please use an accepted method : " . implode(" - ", self::ACCEPTED_METHODS), ResponseCode::METHOD_NOT_ALLOWED);
+            throw new MethodNotAllowed("Please use an accepted method : " . implode(" - ", self::ACCEPTED_METHODS));
         }
     }
 
     private function checkCorrectId(int $id): void
     {
-        if ($id === 0 || $this->productsCrud->getProduct($id) === null) {
-            throw new APIException("Product not found", ResponseCode::NOT_FOUND);
+        if ($id === 0 || $this->productsCrud->get($id) === null) {
+            throw new NotFound("Product not found");
             exit;
         }
     }
@@ -64,19 +68,23 @@ class ProductsApiCrudController
     {
         switch ($this->httpMethod) {
             case "GET":
-                $products = $this->productsCrud->getProductsList();
+                $products = $this->productsCrud->getList();
                 echo json_encode($products);
                 break;
             case "POST":
                 // On récupère les data et on les vérifie :
                 $data = json_decode(file_get_contents("php://input"), true);
                 $this->checkCorrectData($data);
-                // Si on a toutes les datas du produit, on va le créer :
-                $this->productsCrud->create($data);
-                http_response_code(ResponseCode::CREATED);
+                // Si on a toutes les datas du produit, on tente de le créer :
+                try {
+                    $this->productsCrud->create($data);
+                    http_response_code(ResponseCode::CREATED);
+                } catch (Exception $e) {
+                    ExceptionsHandler::sendError($e);
+                }
                 break;
             default:
-                throw new APIException("Please use GET or POST method for a collection operation", ResponseCode::METHOD_NOT_ALLOWED);
+                throw new MethodNotAllowed("Please use GET or POST method for a collection operation");
         }
     }
 
@@ -84,7 +92,7 @@ class ProductsApiCrudController
     {
         switch ($this->httpMethod) {
             case "GET":
-                $product = $this->productsCrud->getProduct($id); 
+                $product = $this->productsCrud->get($id); 
                 echo json_encode($product);
                 break;
             case "PUT":
@@ -92,15 +100,23 @@ class ProductsApiCrudController
                 $data = json_decode(file_get_contents("php://input"), true);
                 $this->checkCorrectData($data);
                 // Si on les a :
-                $this->productsCrud->putProduct($id, $data);
-                http_response_code(ResponseCode::NO_CONTENT);
+                try {
+                    $this->productsCrud->put($id, $data);
+                    http_response_code(ResponseCode::NO_CONTENT);
+                } catch (Exception $e) {
+                    ExceptionsHandler::sendError($e);
+                }
                 break;
             case "DELETE":
-                $this->productsCrud->deleteProduct($id);
-                http_response_code(ResponseCode::NO_CONTENT);
+                try {
+                    $this->productsCrud->delete($id);
+                    http_response_code(ResponseCode::NO_CONTENT);
+                } catch (Exception $e) {
+                    ExceptionsHandler::sendError($e);
+                }
                 break;
             default:
-                throw new APIException("Please use GET, PUT or DELETE metho for a product operation", ResponseCode::METHOD_NOT_ALLOWED);
+                throw new MethodNotAllowed("Please use GET, PUT or DELETE metho for a product operation");
         }
     }
 }
