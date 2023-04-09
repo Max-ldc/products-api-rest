@@ -30,7 +30,7 @@ class ProductsCrud
     public function create(array $data): void
     {
         $query = "INSERT INTO products VALUES (null, :product_name, :base_price, :desc_product)";
-        
+
         $stmt = $this->pdo->prepare($query);
         $stmt->execute([
             'product_name' => $data['name'],

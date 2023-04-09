@@ -19,3 +19,8 @@ A faire également : gérer une 2è ressource. *Facultatif : Essayer de faire un
 
 **Dans ProductsCrud** : Lancement d'erreur. J'ai hésité mais j'ai choisi de lancer des erreurs InternalServerError car en cas d'erreur du client, l'erreur serait repérée plus haut. En cas d'erreur dans le crud, il s'agirait plutôt d'un problème de BDD ou de code
 
+## 3è commit : Gestion d'erreurs
+
+**Dans ProductsApiCrudController**, ajout des try-catch à chaque tentative d'accès à la BDD. Amélioration du checkHttpMethod -> division en 2 parties, après avoir vérifié si il s'agissait d'une opération sur la collection ou sur une ressource
+
+Retour de **ExceptionHandlerInitializer** en Gestion d'erreur globale pour une erreur non prévue

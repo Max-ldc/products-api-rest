@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Config\ExceptionHandlerInitializer;
 use App\Crud\ProductsCrud;
 use App\Exception\ExceptionsHandler;
 use App\Exception\MethodNotAllowed;
@@ -15,39 +14,77 @@ use PDO;
 class ProductsApiCrudController
 {
     private ProductsCrud $productsCrud;
-    private const ACCEPTED_METHODS = ["GET", "POST", "PUT", "DELETE"];
+    private const ACCEPTED_COLLECTION_METHODS = ["GET", "POST"];
+    private const ACCEPTED_RESOURCE_METHODS = ["GET", "PUT", "DELETE"];
 
     public function __construct(
         private PDO $pdo,
         private string $uri,
         private string $httpMethod
     ) {
-        $this->checkHttpMethod();
         $this->productsCrud = new ProductsCrud($pdo);
     }
 
     public function handle(): void
     {
         if ($this->uri === "/products") {
-            $this->collectionOperation();
+            try {
+                // On teste si la méthode correspond pour une opération sur la collection :
+                $this->checkCollectionMethod();
+                $this->collectionOperation();
+            } catch (Exception $e) {
+                ExceptionsHandler::sendError($e);
+            }
         } else {
-            // on récupère l'id derrière /products/
-            $uriExploded = explode('/', $this->uri);
-            $id = intval(end($uriExploded));
-            // on le teste
-            $this->checkCorrectId($id);
-            // S'il est bien dans la BDD :
-            $this->ProductOperation($id);
+            try {
+                // On teste si la méthode correspond pour une opération sur la collection :
+                $this->checkResourceMethod();
+                // on récupère l'id derrière /products/
+                $uriExploded = explode('/', $this->uri);
+                $id = intval(end($uriExploded));
+                // on le teste
+                $this->checkCorrectId($id);
+                // S'il est bien dans la BDD :
+                $this->ProductOperation($id);
+            } catch (Exception $e) {
+                ExceptionsHandler::sendError($e);
+            }
         }
     }
 
-    private function checkHttpMethod(): void
+    /**
+     * Check if the used method is acceptable for a collection operation. Pass without doing anything if it's good, throw an Exception if it's not.
+     *
+     * @return void
+     * @throws Exception
+     */
+    private function checkCollectionMethod(): void
     {
-        if (!in_array($this->httpMethod, self::ACCEPTED_METHODS)) {
-            throw new MethodNotAllowed("Please use an accepted method : " . implode(" - ", self::ACCEPTED_METHODS));
+        if (!in_array($this->httpMethod, self::ACCEPTED_COLLECTION_METHODS)) {
+            throw new MethodNotAllowed("Please use an accepted method for a collection operation : " . implode(" - ", self::ACCEPTED_COLLECTION_METHODS));
         }
     }
 
+    /**
+     * Check if the used method is acceptable for a resource operation. Pass without doing anything if it's good, throw an Exception if it's not. 
+     *
+     * @return void
+     * @throws Exception
+     */
+    private function checkResourceMethod(): void
+    {
+        if (!in_array($this->httpMethod, self::ACCEPTED_RESOURCE_METHODS)) {
+            throw new MethodNotAllowed("Please use an accepted method for a resource operation : " . implode(" - ", self::ACCEPTED_RESOURCE_METHODS));
+        }
+    }
+
+    /**
+     * Check if the id is in the database. Pass without doing anything if it's good, throw an Exception if it's not
+     *
+     * @param integer $id
+     * @return void
+     * @throws Exception
+     */
     private function checkCorrectId(int $id): void
     {
         if ($id === 0 || $this->productsCrud->get($id) === null) {
@@ -56,6 +93,13 @@ class ProductsApiCrudController
         }
     }
 
+    /**
+     * Check if all the data informations are informed. Pass without doing anything if it's good, throw an Exception if it's not
+     *
+     * @param array $data
+     * @return void
+     * @throws Exception
+     */
     private function checkCorrectData(array $data): void
     {
         if (!isset($data['name']) || !isset($data['baseprice']) || !isset($data['description'])) {
@@ -92,7 +136,7 @@ class ProductsApiCrudController
     {
         switch ($this->httpMethod) {
             case "GET":
-                $product = $this->productsCrud->get($id); 
+                $product = $this->productsCrud->get($id);
                 echo json_encode($product);
                 break;
             case "PUT":
