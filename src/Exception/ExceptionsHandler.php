@@ -10,7 +10,7 @@ class ExceptionsHandler
     {
         http_response_code($e->getCode());
         echo json_encode([
-            'error' => 'Une erreur est survenue',
+            'error' => 'An error occurred',
             'code' => $e->getCode(),
             'message' => $e->getMessage()
         ]);

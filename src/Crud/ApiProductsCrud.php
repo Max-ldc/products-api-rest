@@ -4,13 +4,9 @@ namespace App\Crud;
 
 use App\Exception\InternalServerError;
 use Exception;
-use PDO;
 
-class ProductsCrud
+class ApiProductsCrud extends ApiCrud
 {
-    public function __construct(private PDO $pdo)
-    {
-    }
 
     public function getList(): ?array
     {

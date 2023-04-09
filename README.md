@@ -24,3 +24,8 @@ A faire également : gérer une 2è ressource. *Facultatif : Essayer de faire un
 **Dans ProductsApiCrudController**, ajout des try-catch à chaque tentative d'accès à la BDD. Amélioration du checkHttpMethod -> division en 2 parties, après avoir vérifié si il s'agissait d'une opération sur la collection ou sur une ressource
 
 Retour de **ExceptionHandlerInitializer** en Gestion d'erreur globale pour une erreur non prévue
+
+## Troisième commit : Héritage Crud et Controller
+
+Ajout d'une classe abstraite ApiCrud et d'une classe abstraite ApiCrudController pour préparer l'arrivée d'autres ressources. J'ai remonté les méthodes de check d'infos dans ApiCrudController pour qu'elles soient disponibles pour toutes les ressources.
+Les autres méthodes ont été mis en abstraites pour qu'elles soient bien présentes dans les classes enfants de ApiCrud et ApiCrudController
