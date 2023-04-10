@@ -2,19 +2,20 @@
 
 namespace App\Controller;
 
-use App\Crud\ApiProductsCrud;
+use App\Crud\ApiCategoriesCrud;
 use App\Exception\ExceptionsHandler;
 use App\Exception\MethodNotAllowed;
 use App\Exception\UnprocessableContentException;
 use App\Http\ResponseCode;
 use Exception;
 
-class ProductsApiCrudController extends ApiCrudController
+class CategoriesApiCrudController extends ApiCrudController
 {
+
     public function handle(): void
     {
-        $this->Crud = new ApiProductsCrud($this->pdo);
-        if ($this->uri === "/products") {
+        $this->Crud = new ApiCategoriesCrud($this->pdo);
+        if ($this->uri === "/categories") {
             try {
                 // On teste si la méthode correspond pour une opération sur la collection :
                 $this->checkCollectionMethod();
@@ -40,16 +41,16 @@ class ProductsApiCrudController extends ApiCrudController
     }
 
     /**
-     * Check if all the data informations are informed. Pass without doing anything if it's good, throw an Exception if it's not
+     * Check if the category name is informed. Pass without doing anything if it's good, throw an Exception if it's not
      *
-     * @param array $data name, base price & description
+     * @param array $data name
      * @return void
      * @throws Exception
      */
     public function checkCorrectData(array $data): void
     {
-        if (!isset($data['name']) || !isset($data['baseprice']) || !isset($data['description'])) {
-            throw new UnprocessableContentException("Name, Base price and Description are required");
+        if (!isset($data['name'])) {
+            throw new UnprocessableContentException("Name is required");
             exit;
         }
     }
@@ -58,15 +59,15 @@ class ProductsApiCrudController extends ApiCrudController
     {
         switch ($this->httpMethod) {
             case "GET":
-                $products = $this->Crud->getList();
-                echo json_encode($products);
+                $categories = $this->Crud->getList();
+                echo json_encode($categories);
                 break;
             case "POST":
                 try {
-                    // On récupère les data et on les vérifie :
+                    // On récupère les data et on les vérifie
                     $data = json_decode(file_get_contents("php://input"), true);
                     $this->checkCorrectData($data);
-                    // Si on a toutes les datas du produit, on tente de le créer :
+                    // Si on a la bonne data pour une catégorie (le nom), on tente de la créer :
                     $this->Crud->create($data);
                     http_response_code(ResponseCode::CREATED);
                 } catch (Exception $e) {
@@ -82,14 +83,14 @@ class ProductsApiCrudController extends ApiCrudController
     {
         switch ($this->httpMethod) {
             case "GET":
-                $product = $this->Crud->get($id);
-                echo json_encode($product);
+                $category = $this->Crud->get($id);
+                echo json_encode($category);
                 break;
             case "PUT":
-                // On récupère les datas et on les vérifie :
+                // On récupère les data et on les vérifie
                 $data = json_decode(file_get_contents("php://input"), true);
                 $this->checkCorrectData($data);
-                // Si on les a :
+                // Si on a la bonne data pour une catégorie (le nom), on tente de la créer :
                 try {
                     $this->Crud->put($id, $data);
                     http_response_code(ResponseCode::NO_CONTENT);

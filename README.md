@@ -1,7 +1,7 @@
 ## Premier commit assez tard
 
-Après être parti d'un CRUD codé sur index.php avec une chaîne de if et de switch, j'ai refactorisé en classe ProductsCrud, puis je t'ai montré ça (le jeudi 06/04 en distanciel).
-Tu m'as proposé d'essayer de continuer la refactorisation en créant des classes Controller, j'ai donc créé ProductController (renommée ProductsApiCrudController avec ta correction).
+Après être parti d'un CRUD codé sur index.php avec une chaîne de if et de switch, j'ai refactorisé en classe ProductsCrud, puis je t'ai montré ça *(le jeudi 06/04 en distanciel)*.
+Tu m'as proposé d'essayer de continuer la refactorisation en créant des classes Controller, j'ai donc créé ProductController *(renommée ProductsApiCrudController avec ta correction)*.
 
 Avec ta correction j'ai également créé les classes DbInitializer, ExceptionHandlerInitializer, ResponseCode, afin de bien dissocier les fonctionnalités.
 J'ai tenté de créer une classe APIException, pour lancer une Exception globale à qui je rentre un message d'erreur voulu et le ResponseCode correspondant. Je récupère cette erreur tout en haut du code, dans ExceptionHandlerInitializer.
@@ -25,7 +25,17 @@ A faire également : gérer une 2è ressource. *Facultatif : Essayer de faire un
 
 Retour de **ExceptionHandlerInitializer** en Gestion d'erreur globale pour une erreur non prévue
 
-## Troisième commit : Héritage Crud et Controller
+## 4è commit : Héritage Crud et Controller
 
 Ajout d'une classe abstraite ApiCrud et d'une classe abstraite ApiCrudController pour préparer l'arrivée d'autres ressources. J'ai remonté les méthodes de check d'infos dans ApiCrudController pour qu'elles soient disponibles pour toutes les ressources.
-Les autres méthodes ont été mis en abstraites pour qu'elles soient bien présentes dans les classes enfants de ApiCrud et ApiCrudController
+Les autres méthodes ont été mis en abstraites pour qu'elles soient bien définies dans les classes enfants de ApiCrud et ApiCrudController.
+
+## 5è commit : Ajout d'une ressource categories
+
+**Ajout de la gestion d'une ressource categories**, avec un id, un nom et une description nullable.
+Création de CategoriesApiCrudController, héritant de ApiCrudController, et de ApiCategoriesCrud, héritant de ApiCrud.
+Gestion des 2 ressources sur index.php et envoi d'erreur si ça n'est pas l'une d'elles
+
+*Prochaines étapes :* 
+- Tenter la refactorisation des méthodes handle qui se ressemblent beaucoup entre les ressources *(il y a juste la condition d'URI qui change)*
+- Lier les 2 ressources : chaque produit peut avoir 0 ou 1 catégories. Et une catégorie peut avoir 0 ou plusieurs produits (clé étrangère côté produits)

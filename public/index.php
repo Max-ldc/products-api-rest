@@ -4,6 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Config\DbInitializer;
 use App\Config\ExceptionHandlerInitializer;
+use App\Controller\CategoriesApiCrudController;
 use App\Controller\ProductsApiCrudController;
 use App\Http\ResponseCode;
 use Symfony\Component\Dotenv\Dotenv;
@@ -29,4 +30,14 @@ $httpMethod = $_SERVER['REQUEST_METHOD'];
 if (str_contains($uri, "/products")) {
     $controller = new ProductsApiCrudController($pdo, $uri, $httpMethod);
     $controller->handle();
+} else if (str_contains($uri, "/categories")) {
+    $controller = new CategoriesApiCrudController($pdo, $uri, $httpMethod);
+    $controller->handle();
+} else {
+    http_response_code(ResponseCode::BAD_REQUEST);
+    echo json_encode([
+        'error' => 'An error occurred',
+        'code' => 400,
+        'message' => "Unfoundable resource"
+    ]);
 }
